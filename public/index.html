@@ -11,6 +11,7 @@
 <body class="h-screen flex items-center justify-center bg-gray-100">
     <div class="bg-white p-8 border border-gray-300 shadow-lg text-center">
         <h1 class="text-2xl font-bold mb-4">Gamepad Tester</h1>
+        <h1 id="status" class="text-xl mb-4"></h1>
         <p id="logButton">Press buttons to log here</p>
         <p id="logAxis">Move axis to log here</p>
     </div>
@@ -19,15 +20,17 @@
         let logButton = document.getElementById("logButton");
         let logAxis = document.getElementById("logAxis");
         window.addEventListener("gamepadconnected", function (event) {
-            alert("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-                event.gamepad.index, event.gamepad.id,
-                event.gamepad.buttons.length, event.gamepad.axes.length);
+            // alert("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+            //     event.gamepad.index, event.gamepad.id,
+            //     event.gamepad.buttons.length, event.gamepad.axes.length);
+            document.getElementById('status').innerHTML = "Gamepad Status: Connected";
             startPolling();
         });
-
+        
         window.addEventListener("gamepaddisconnected", function (event) {
-            alert("Gamepad disconnected from index %d: %s",
-                event.gamepad.index, event.gamepad.id);
+            document.getElementById('status').innerHTML = "Gamepad Status: Connected";
+            // alert("Gamepad disconnected from index %d: %s",
+            // event.gamepad.index, event.gamepad.id);
             stopPolling();
         });
 
@@ -62,7 +65,14 @@
         function checkButtons(gamepad) {
             for (let i = 0; i < gamepad.buttons.length - 1; i++) {
                 if (gamepad.buttons[i].pressed) {
-                    logButton.innerHTML = `Button ${i} is pressed.`
+                    if (gamepad.buttons[i].value < 1) {
+
+                        logButton.innerHTML = `Button ${i} is pressed with ${parseInt(gamepad.buttons[i].value * 100)}% of pressure.`
+                    }
+                    else {
+                        logButton.innerHTML = `Button ${i} is pressed.`
+
+                    }
                     console.log(`Button ${i} on gamepad ${gamepad.index} is pressed.`);
                 }
             }

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="h-screen flex items-center justify-center bg-gray-100">
+    <div class="bg-white p-8 border border-gray-300 shadow-lg text-center">
+        <h1 class="text-2xl font-bold mb-4">Gamepad Tester</h1>
+        <p id="logButton">Press buttons to log here</p>
+        <p id="logAxis">Move axis to log here</p>
+    </div>
+    <!-- <script src="checkGamepad.js"></script> -->
+    <script>
+        let logButton = document.getElementById("logButton");
+        let logAxis = document.getElementById("logAxis");
+        window.addEventListener("gamepadconnected", function (event) {
+            alert("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                event.gamepad.index, event.gamepad.id,
+                event.gamepad.buttons.length, event.gamepad.axes.length);
+            startPolling();
+        });
+
+        window.addEventListener("gamepaddisconnected", function (event) {
+            alert("Gamepad disconnected from index %d: %s",
+                event.gamepad.index, event.gamepad.id);
+            stopPolling();
+        });
+
+        let polling = false;
+
+        function startPolling() {
+            if (!polling) {
+                polling = true;
+                pollGamepads();
+            }
+        }
+
+        function stopPolling() {
+            polling = false;
+        }
+
+        function pollGamepads() {
+            if (!polling) return;
+
+            const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+            for (let i = 0; i < gamepads.length; i++) {
+                const gamepad = gamepads[i];
+                if (gamepad) {
+                    checkButtons(gamepad);
+                    checkAxes(gamepad);
+                }
+            }
+
+            requestAnimationFrame(pollGamepads);
+        }
+
+        function checkButtons(gamepad) {
+            for (let i = 0; i < gamepad.buttons.length - 1; i++) {
+                if (gamepad.buttons[i].pressed) {
+                    logButton.innerHTML = `Button ${i} is pressed.`
+                    console.log(`Button ${i} on gamepad ${gamepad.index} is pressed.`);
+                }
+            }
+        }
+        function checkAxes(gamepad) {
+            logAxis.innerHTML = `Left stick: Vertical: ${gamepad.axes[1].toFixed(2) * -100}%, Horizontal: ${gamepad.axes[0].toFixed(2) * 100}%<br>Right stick: Vertical: ${gamepad.axes[3].toFixed(2) * -100}%, Horizontal: ${gamepad.axes[2].toFixed(2) * 100}%`;
+            for (let i = 0; i < gamepad.axes.length; i++) {
+                console.log(`Axis ${i} on gamepad ${gamepad.index} value: ${gamepad.axes[i].toFixed(2)}`);
+            }
+        }
+
+
+        // Initial check if any gamepads are already connected
+        window.addEventListener("load", function () {
+            const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+            for (let i = 0; i < gamepads.length; i++) {
+                if (gamepads[i]) {
+                    startPolling();
+                    break;
+                }
+            }
+        });
+
+    </script>
+</body>
+
+</html>
